@@ -123,14 +123,14 @@ fi
 %attr(755,root,root) %{_bindir}/efikeygen
 %attr(755,root,root) %{_bindir}/pesign
 %attr(755,root,root) %{_bindir}/pesign-client
-%dir /etc/pki/pesign
+%attr(775,pesign,pesign) %dir /etc/pki/pesign
 # what should be proper owner???
 %dir /etc/popt.d
 /etc/popt.d/pesign.popt
 /etc/rpm/macros.pesign
 %attr(754,root,root) /etc/rc.d/init.d/pesign
 %{systemdunitdir}/pesign.service
-%dir /var/run/pesign
+%attr(770,pesign,pesign) %dir /var/run/pesign
 %{systemdtmpfilesdir}/pesign.conf
 %{_mandir}/man1/efikeygen.1*
 %{_mandir}/man1/pesign.1*
