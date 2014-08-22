@@ -1,0 +1,11 @@
+--- pesign-0.109/src/efikeygen.c.orig	2013-10-09 16:45:11.000000000 +0200
++++ pesign-0.109/src/efikeygen.c	2014-08-21 21:07:31.942245018 +0200
+@@ -333,7 +333,7 @@
+ 
+ 	oid = SECOID_FindOIDByTag(SEC_OID_PKCS9_EXTENSION_REQUEST);
+ 
+-	for (int i; crq->attributes[i]; i++) {
++	for (int i = 0; crq->attributes[i]; i++) {
+ 		attr = crq->attributes[i];
+ 		if (attr->attrType.len != oid->oid.len)
+ 			continue;
