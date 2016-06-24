@@ -1,0 +1,104 @@
+--- pesign-0.112/src/pesign.sysvinit.in.orig	2016-04-20 18:11:32.000000000 +0200
++++ pesign-0.112/src/pesign.sysvinit.in	2016-06-24 17:29:09.145983773 +0200
+@@ -13,41 +13,44 @@
+ # Description: The pesign PE signing daemon
+ ### END INIT INFO
+ 
+-. /etc/init.d/functions
+-[ -f /usr/bin/pesign ] || exit 1
++. /etc/rc.d/init.d/functions
+ 
+ RETVAL=0
+ 
+-start(){
+-    echo -n "Starting pesign: "
++start() {
++	if [ -f /var/lock/subsys/pesign ]; then
++		msg_already_running "pesign"
++		return
++	fi
++
++    msg_starting pesign
+     daemon /usr/bin/pesign --daemonize
+     RETVAL=$?
+-    echo
+-    touch /var/lock/subsys/pesign
++    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/pesign
+     @@LIBEXECDIR@@/pesign/pesign-authorize-users
+     @@LIBEXECDIR@@/pesign/pesign-authorize-groups
+ }
+ 
+-stop(){
+-    echo -n "Stopping pesign: "
++stop() {
++	if [ ! -f /var/lock/subsys/pesign ]; then
++		msg_not_running pesign
++		return
++	fi
++
++	msg_stopping pesign
+     killproc -p /var/run/pesign.pid pesignd
+-    RETVAL=$?
+-    echo
+     rm -f /var/lock/subsys/pesign
+ }
+ 
+-restart(){
+-    stop
+-    start
+-}
+-
+-reload(){
+-    stop
+-    start
+-}
++condrestart() {
++	if [ ! -f /var/lock/subsys/pesign ]; then
++		msg_not_running pesign
++		RETVAL=$1
++		return
++	fi
+ 
+-condrestart(){
+-    [ -e /var/lock/subsys/pesign ] && restart
++	stop
++	start
+ }
+ 
+ # See how we were called.
+@@ -59,26 +62,22 @@
+ 	stop
+ 	;;
+     status)
+-	status /usr/bin/pesign
++	status pesign /usr/bin/pesign
++	RETVAL=$?
+ 	;;
+     restart)
+-	restart
+-	;;
+-    reload)
+-	reload
++	stop
++	start
+ 	;;
+     force-reload)
+-	reload
+-	;;
+-    condrestart)
+-	condrestart
++	condrestart 7
+ 	;;
+-    try-restart)
+-	condrestart
++    try-restart|condrestart)
++	condrestart 0
+ 	;;
+     *)
+-	echo "Usage: pesign {start|stop|status|restart|condrestart|reload}"
+-	RETVAL=1
++	echo "Usage: pesign {start|stop|status|restart|try-restart|condrestart|force-reload}"
++	exit 3
+ esac
+ 
+ exit $RETVAL
