@@ -2,7 +2,7 @@ Summary:	Signing tool for PE-COFF binaries
 Summary(pl.UTF-8):	Narzędzie do podpisywania binariów PE-COFF
 Name:		pesign
 Version:	0.112
-Release:	2
+Release:	3
 License:	GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/rhinstaller/pesign/releases
