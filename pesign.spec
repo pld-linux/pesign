@@ -5,12 +5,12 @@ Version:	0.112
 Release:	3
 License:	GPL v2
 Group:		Applications/System
-#Source0Download: https://github.com/rhinstaller/pesign/releases
-Source0:	https://github.com/rhinstaller/pesign/releases/download/%{version}/%{name}-%{version}.tar.bz2
+#Source0Download: https://github.com/rhboot/pesign/releases
+Source0:	https://github.com/rhboot/pesign/releases/download/%{version}/%{name}-%{version}.tar.bz2
 # Source0-md5:	eae1d66e160be744ff310ad7592ae31e
 Patch0:		%{name}-pld.patch
 Patch1:		%{name}-build.patch
-URL:		https://github.com/rhinstaller/pesign
+URL:		https://github.com/rhboot/pesign
 BuildRequires:	efivar-devel
 BuildRequires:	nspr-devel
 BuildRequires:	nss-devel
