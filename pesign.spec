@@ -100,7 +100,7 @@ rm -rf $RPM_BUILD_ROOT
 	libexecdir=%{_libexecdir}
 
 # omitted from install (as of 113)
-install libdpe/libdpe.so $RPM_BUILD_ROOT%{_libdir}/libdpe.so.0.%{version}
+install -D libdpe/libdpe.so $RPM_BUILD_ROOT%{_libdir}/libdpe.so.0.%{version}
 ln -sf libdpe.so.0.%{version} $RPM_BUILD_ROOT%{_libdir}/libdpe.so
 cp -p libdpe/libdpe.a $RPM_BUILD_ROOT%{_libdir}
 install -d $RPM_BUILD_ROOT%{_includedir}/libdpe
