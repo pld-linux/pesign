@@ -1,25 +1,11 @@
---- pesign-0.112/libdpe/pe_allocspace.c.orig	2016-04-20 18:11:32.000000000 +0200
-+++ pesign-0.112/libdpe/pe_allocspace.c	2016-06-23 21:35:48.693876721 +0200
-@@ -61,7 +61,7 @@
- 	struct pe32plus_opt_hdr *opthdr = pe->state.pe32plus_exe.opthdr;
+--- pesign-113/src/efikeygen.c.orig	2019-05-10 20:53:51.000000000 +0200
++++ pesign-113/src/efikeygen.c	2019-09-12 20:14:59.158295466 +0200
+@@ -208,7 +208,7 @@
+ add_cert_type(cms_context *cms, void *extHandle, int is_ca)
+ {
+ 	SECItem bitStringValue;
+-	unsigned char type = NS_CERT_TYPE_APP;
++	unsigned char type = NS_CERT_TYPE_APP & 0xFF;
  
- 	Pe_Scn *scn = NULL;
--	struct section_header shdr = { 0, }, tmp_shdr;
-+	struct section_header shdr = { { 0, }, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, tmp_shdr;
- 	if (pehdr->sections < 1)
- 		return -1;
- 
---- pesign-0.112/src/cms_common.c.orig	2016-04-20 18:11:32.000000000 +0200
-+++ pesign-0.112/src/cms_common.c	2016-06-23 21:44:34.271029426 +0200
-@@ -663,7 +663,11 @@
- 		.type = siUnsignedInteger,
- 	};
- 
-+#if defined(_LP64)
- 	if (integer < 0x100000000) {
-+#else
-+	if (1) {
-+#endif
- 		u32 = integer & 0xffffffffUL;
- 		input.data = (void *)&u32;
- 		input.len = sizeof(u32);
+ 	if (is_ca)
+ 		type |= NS_CERT_TYPE_SSL_CA |

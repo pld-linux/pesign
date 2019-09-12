@@ -1,17 +1,18 @@
 Summary:	Signing tool for PE-COFF binaries
 Summary(pl.UTF-8):	Narzędzie do podpisywania binariów PE-COFF
 Name:		pesign
-Version:	0.112
-Release:	3
-License:	GPL v2
+Version:	113
+Release:	1
+License:	GPL v3+
 Group:		Applications/System
 #Source0Download: https://github.com/rhboot/pesign/releases
 Source0:	https://github.com/rhboot/pesign/releases/download/%{version}/%{name}-%{version}.tar.bz2
-# Source0-md5:	eae1d66e160be744ff310ad7592ae31e
+# Source0-md5:	4710e207b69c17537d3b3f18ce19948e
 Patch0:		%{name}-pld.patch
 Patch1:		%{name}-build.patch
 URL:		https://github.com/rhboot/pesign
 BuildRequires:	efivar-devel
+BuildRequires:	libuuid-devel
 BuildRequires:	nspr-devel
 BuildRequires:	nss-devel
 BuildRequires:	pkgconfig
@@ -78,28 +79,29 @@ Statyczna biblioteka libdpe.
 %patch0 -p1
 %patch1 -p1
 
-%{__sed} -i -e 's/-g -O0/%{rpmcflags} -Wno-unused-result/' Make.defaults
-
 %{__sed} -i -e 's,\$(libdatadir)systemd/system,%{systemdunitdir},' src/Makefile
 
 %build
+# due to checks (to distinguish gcc/clang) in Make.defaults gcc cannot be prefixed with target-
+# -g is required because of -fvar-tracking
+CC="gcc" \
+CFLAGS="%{rpmcflags} -g" \
 %{__make} \
-	CC="%{__cc}" \
 	LIBDIR=%{_libdir} \
-	libexecdir=%{_libdir}
+	libdir=%{_libdir} \
+	libexecdir=%{_libexecdir}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 %{__make} install install_systemd install_sysvinit \
 	DESTDIR=$RPM_BUILD_ROOT \
-	LIBDIR=%{_libdir} \
-	libexecdir=%{_libdir}
+	libdir=%{_libdir} \
+	libexecdir=%{_libexecdir}
 
-# omitted from install (as of 0.112)
-install libdpe/libdpe.so $RPM_BUILD_ROOT%{_libdir}/libdpe.so.%{version}
-ln -sf libdpe.so.%{version} $RPM_BUILD_ROOT%{_libdir}/libdpe.so.0
-ln -sf libdpe.so.%{version} $RPM_BUILD_ROOT%{_libdir}/libdpe.so
+# omitted from install (as of 113)
+install libdpe/libdpe.so $RPM_BUILD_ROOT%{_libdir}/libdpe.so.0.%{version}
+ln -sf libdpe.so.0.%{version} $RPM_BUILD_ROOT%{_libdir}/libdpe.so
 cp -p libdpe/libdpe.a $RPM_BUILD_ROOT%{_libdir}
 install -d $RPM_BUILD_ROOT%{_includedir}/libdpe
 cp -p include/libdpe/*.h $RPM_BUILD_ROOT%{_includedir}/libdpe
@@ -142,9 +144,8 @@ fi
 %attr(755,root,root) %{_bindir}/pesigcheck
 %attr(755,root,root) %{_bindir}/pesign
 %attr(755,root,root) %{_bindir}/pesign-client
-%dir %{_libdir}/pesign
-%attr(755,root,root) %{_libdir}/pesign/pesign-authorize-groups
-%attr(755,root,root) %{_libdir}/pesign/pesign-authorize-users
+%dir %{_libexecdir}/pesign
+%attr(755,root,root) %{_libexecdir}/pesign/pesign-authorize
 %dir %{_sysconfdir}/pesign
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/pesign/groups
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/pesign/users
@@ -166,8 +167,7 @@ fi
 
 %files libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libdpe.so.*.*
-%attr(755,root,root) %ghost %{_libdir}/libdpe.so.0
+%attr(755,root,root) %{_libdir}/libdpe.so.0.%{version}
 
 %files devel
 %defattr(644,root,root,755)

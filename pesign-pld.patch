@@ -1,6 +1,6 @@
---- pesign-0.112/src/pesign.sysvinit.in.orig	2016-04-20 18:11:32.000000000 +0200
-+++ pesign-0.112/src/pesign.sysvinit.in	2016-06-24 17:29:09.145983773 +0200
-@@ -13,41 +13,44 @@
+--- pesign-113/src/pesign.sysvinit.in.orig	2019-05-10 20:53:51.000000000 +0200
++++ pesign-113/src/pesign.sysvinit.in	2019-09-12 19:03:31.078192655 +0200
+@@ -13,45 +13,47 @@
  # Description: The pesign PE signing daemon
  ### END INIT INFO
  
@@ -13,30 +13,32 @@
 -start(){
 -    echo -n "Starting pesign: "
 +start() {
-+	if [ -f /var/lock/subsys/pesign ]; then
-+		msg_already_running "pesign"
-+		return
-+	fi
++    if [ -f /var/lock/subsys/pesign ]; then
++	msg_already_running "pesign"
++	return
++    fi
 +
 +    msg_starting pesign
+     mkdir /var/run/pesign 2>/dev/null &&
+         chown pesign:pesign /var/run/pesign &&
+         chmod 0770 /var/run/pesign
      daemon /usr/bin/pesign --daemonize
      RETVAL=$?
 -    echo
 -    touch /var/lock/subsys/pesign
 +    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/pesign
-     @@LIBEXECDIR@@/pesign/pesign-authorize-users
-     @@LIBEXECDIR@@/pesign/pesign-authorize-groups
+     @@LIBEXECDIR@@/pesign/pesign-authorize
  }
  
 -stop(){
 -    echo -n "Stopping pesign: "
 +stop() {
-+	if [ ! -f /var/lock/subsys/pesign ]; then
-+		msg_not_running pesign
-+		return
-+	fi
++    if [ ! -f /var/lock/subsys/pesign ]; then
++	msg_not_running pesign
++	return
++    fi
 +
-+	msg_stopping pesign
++    msg_stopping pesign
      killproc -p /var/run/pesign.pid pesignd
 -    RETVAL=$?
 -    echo
@@ -49,24 +51,24 @@
 -}
 -
 -reload(){
--    stop
--    start
--}
 +condrestart() {
-+	if [ ! -f /var/lock/subsys/pesign ]; then
-+		msg_not_running pesign
-+		RETVAL=$1
-+		return
-+	fi
++    if [ ! -f /var/lock/subsys/pesign ]; then
++	msg_not_running pesign
++	RETVAL=$1
++	return
++    fi
+     stop
+     start
+ }
  
 -condrestart(){
 -    [ -e /var/lock/subsys/pesign ] && restart
-+	stop
-+	start
- }
- 
+-}
+-
  # See how we were called.
-@@ -59,26 +62,22 @@
+ case "$1" in
+     start)
+@@ -61,26 +63,22 @@
  	stop
  	;;
      status)
