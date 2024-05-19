@@ -1,15 +1,15 @@
 Summary:	Signing tool for PE-COFF binaries
 Summary(pl.UTF-8):	Narzędzie do podpisywania binariów PE-COFF
 Name:		pesign
-Version:	113
+Version:	116
 Release:	1
 License:	GPL v3+
 Group:		Applications/System
 #Source0Download: https://github.com/rhboot/pesign/releases
 Source0:	https://github.com/rhboot/pesign/releases/download/%{version}/%{name}-%{version}.tar.bz2
-# Source0-md5:	4710e207b69c17537d3b3f18ce19948e
+# Source0-md5:	10cd95bf1bee5097321efc141e8ab292
 Patch0:		%{name}-pld.patch
-Patch1:		%{name}-build.patch
+Patch1:		%{name}-gcc.patch
 URL:		https://github.com/rhboot/pesign
 BuildRequires:	efivar-devel
 BuildRequires:	libuuid-devel
@@ -30,6 +30,9 @@ Requires:	rc-scripts
 Provides:	group(pesign)
 Provides:	user(pesign)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+# TODO: consider move to /run following upstream
+%define		_rundir	/var/run
 
 %description
 Signing tool for PE-COFF binaries, hopefully at least vaguely
@@ -89,7 +92,8 @@ CFLAGS="%{rpmcflags} -g" \
 %{__make} \
 	LIBDIR=%{_libdir} \
 	libdir=%{_libdir} \
-	libexecdir=%{_libexecdir}
+	libexecdir=%{_libexecdir} \
+	rundir=%{_rundir}/
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -97,14 +101,19 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install install_systemd install_sysvinit \
 	DESTDIR=$RPM_BUILD_ROOT \
 	libdir=%{_libdir} \
-	libexecdir=%{_libexecdir}
+	libexecdir=%{_libexecdir} \
+	rundir=%{_rundir}/
 
-# omitted from install (as of 113)
+# install disabled in libdpe/Makefile (as of 116)
 install -D libdpe/libdpe.so $RPM_BUILD_ROOT%{_libdir}/libdpe.so.0.%{version}
 ln -sf libdpe.so.0.%{version} $RPM_BUILD_ROOT%{_libdir}/libdpe.so
 cp -p libdpe/libdpe.a $RPM_BUILD_ROOT%{_libdir}
 install -d $RPM_BUILD_ROOT%{_includedir}/libdpe
 cp -p include/libdpe/*.h $RPM_BUILD_ROOT%{_includedir}/libdpe
+
+%if "%{_rundir}" != "/run"
+install -d $RPM_BUILD_ROOT%{_rundir}/pesign
+%endif
 
 # just unwanted COPYING file; make space for %doc
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/COPYING
@@ -137,15 +146,16 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc README TODO
+%doc README.md TODO
 %attr(755,root,root) %{_bindir}/authvar
 %attr(755,root,root) %{_bindir}/efikeygen
-%attr(755,root,root) %{_bindir}/efisiglist
 %attr(755,root,root) %{_bindir}/pesigcheck
 %attr(755,root,root) %{_bindir}/pesign
 %attr(755,root,root) %{_bindir}/pesign-client
+%attr(755,root,root) %{_bindir}/pesum
 %dir %{_libexecdir}/pesign
 %attr(755,root,root) %{_libexecdir}/pesign/pesign-authorize
+%attr(755,root,root) %{_libexecdir}/pesign/pesign-rpmbuild-helper
 %dir %{_sysconfdir}/pesign
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/pesign/groups
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/pesign/users
@@ -156,11 +166,12 @@ fi
 /etc/rpm/macros.pesign
 %attr(754,root,root) /etc/rc.d/init.d/pesign
 %{systemdunitdir}/pesign.service
-%attr(770,pesign,pesign) %dir /var/run/pesign
+%if "%{_rundir}" != "/run"
+%attr(770,pesign,pesign) %dir %{_rundir}/pesign
+%endif
 %{systemdtmpfilesdir}/pesign.conf
 %{_mandir}/man1/authvar.1*
 %{_mandir}/man1/efikeygen.1*
-%{_mandir}/man1/efisiglist.1*
 %{_mandir}/man1/pesigcheck.1*
 %{_mandir}/man1/pesign.1*
 %{_mandir}/man1/pesign-client.1*

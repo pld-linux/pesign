@@ -1,0 +1,12 @@
+--- pesign-116/src/password.c.orig	2023-01-31 15:55:13.000000000 +0100
++++ pesign-116/src/password.c	2024-05-19 07:27:39.565292240 +0200
+@@ -313,7 +313,9 @@ SECU_FilePasswd(PK11SlotInfo *slot, PRBo
+ 		/* Workaround for -fanalzer/reallocarray() bug
+ 		 * https://bugzilla.redhat.com/show_bug.cgi?id=2047926 */
+ #pragma GCC diagnostic push
++#if defined(__GNUC__) && (__GNUC__ >= 11)
+ #pragma GCC diagnostic ignored "-Wanalyzer-mismatching-deallocation"
++#endif
+ 		new_phrases = reallocarray(phrases, nphrases + 1, sizeof(struct token_pass));
+ 		if (!new_phrases)
+ 			goto err_phrases;

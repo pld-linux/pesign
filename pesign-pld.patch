@@ -1,6 +1,6 @@
---- pesign-113/src/pesign.sysvinit.in.orig	2019-05-10 20:53:51.000000000 +0200
-+++ pesign-113/src/pesign.sysvinit.in	2019-09-12 19:03:31.078192655 +0200
-@@ -13,45 +13,47 @@
+--- pesign-116/src/pesign.sysvinit.in.orig	2023-01-31 15:55:13.000000000 +0100
++++ pesign-116/src/pesign.sysvinit.in	2024-05-19 07:13:51.483111680 +0200
+@@ -13,45 +13,48 @@
  # Description: The pesign PE signing daemon
  ### END INIT INFO
  
@@ -19,12 +19,12 @@
 +    fi
 +
 +    msg_starting pesign
-     mkdir /var/run/pesign 2>/dev/null &&
-         chown pesign:pesign /var/run/pesign &&
-         chmod 0770 /var/run/pesign
+     mkdir @@RUNDIR@@pesign 2>/dev/null &&
+         chown pesign:pesign @@RUNDIR@@pesign &&
+         chmod 0770 @@RUNDIR@@pesign
      daemon /usr/bin/pesign --daemonize
      RETVAL=$?
--    echo
+     echo
 -    touch /var/lock/subsys/pesign
 +    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/pesign
      @@LIBEXECDIR@@/pesign/pesign-authorize
@@ -39,7 +39,7 @@
 +    fi
 +
 +    msg_stopping pesign
-     killproc -p /var/run/pesign.pid pesignd
+     killproc -p @@RUNDIR@@pesign.pid pesignd
 -    RETVAL=$?
 -    echo
      rm -f /var/lock/subsys/pesign
@@ -68,7 +68,7 @@
  # See how we were called.
  case "$1" in
      start)
-@@ -61,26 +63,22 @@
+@@ -61,26 +64,22 @@ case "$1" in
  	stop
  	;;
      status)
