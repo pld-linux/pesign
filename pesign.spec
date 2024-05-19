@@ -10,9 +10,11 @@ Source0:	https://github.com/rhboot/pesign/releases/download/%{version}/%{name}-%
 # Source0-md5:	10cd95bf1bee5097321efc141e8ab292
 Patch0:		%{name}-pld.patch
 Patch1:		%{name}-gcc.patch
+Patch2:		%{name}-types.patch
 URL:		https://github.com/rhboot/pesign
 BuildRequires:	efivar-devel
 BuildRequires:	libuuid-devel
+BuildRequires:	mandoc
 BuildRequires:	nspr-devel
 BuildRequires:	nss-devel
 BuildRequires:	pkgconfig
@@ -81,6 +83,7 @@ Statyczna biblioteka libdpe.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %{__sed} -i -e 's,\$(libdatadir)systemd/system,%{systemdunitdir},' src/Makefile
 

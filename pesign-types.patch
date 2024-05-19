@@ -1,0 +1,25 @@
+Fix for 32-bit platforms with 64-bit time_t
+--- pesign-116/src/util.h.orig	2023-01-31 15:55:13.000000000 +0100
++++ pesign-116/src/util.h	2024-05-19 18:31:51.158999714 +0200
+@@ -272,8 +272,8 @@ extern long verbosity(void);
+ #define dbgprintf_(tv, file, func, line, fmt, args...) ({	\
+ 		struct timeval tv;				\
+ 		gettimeofday(&tv, NULL);			\
+-		warnx("%ld.%lu %s:%s():%d: " fmt,		\
+-		      tv.tv_sec, tv.tv_usec,			\
++		warnx("%lld.%lu %s:%s():%d: " fmt,		\
++		      (long long)tv.tv_sec, (unsigned long)tv.tv_usec, \
+ 		      file, func, line, ##args);		\
+ 	})
+ #if defined(PESIGN_DEBUG)
+--- pesign-116/src/efikeygen.c.orig	2023-01-31 15:55:13.000000000 +0100
++++ pesign-116/src/efikeygen.c	2024-05-19 18:42:56.652988457 +0200
+@@ -1101,7 +1101,7 @@ int main(int argc, char *argv[])
+ 		}
+ 	} else {
+ 		// Mon Jan 19 03:14:07 GMT 2037, aka 0x7fffffff minus 1 year.
+-		time_t time = 0x7ffffffful - 60ul * 60 * 24 * 365;
++		unsigned long time = 0x7ffffffful - 60ul * 60 * 24 * 365;
+ 		dbgprintf("not_valid_after:%lu", time);
+ 		not_after = (PRTime)time * PR_USEC_PER_SEC;
+ 	}
